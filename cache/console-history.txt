@@ -1,0 +1,4 @@
+fragments
+const fragments = c.interface.fragments.filter(f => f.type === 'function').map(f => f.name)
+Object.keys(c.interface.functions)
+const c = await ethers.getContractAt("HealthcareSystem", "0x18B5630bACFcd916BAF39274955cFF014b672560")
