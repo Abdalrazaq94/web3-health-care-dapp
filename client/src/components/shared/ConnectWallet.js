@@ -6,12 +6,14 @@ function ConnectWallet() {
   const { disconnect } = useDisconnect();
 
   const handleConnect = () => {
-    // If a wallet extension exists (computer or MetaMask in-app browser) use it
+    alert(connectors.map((c) => c.id + ' : ' + c.type).join('\n') || 'NO CONNECTORS');
+
+    // Computer or MetaMask in-app browser: use the extension
     if (typeof window !== 'undefined' && window.ethereum) {
       const inj = connectors.find((c) => c.type === 'injected');
       if (inj) return connect({ connector: inj });
     }
-    // Otherwise (normal phone browser) use WalletConnect
+    // Phone browser: use WalletConnect
     const wc = connectors.find((c) => c.id === 'walletConnect');
     if (wc) return connect({ connector: wc });
   };
