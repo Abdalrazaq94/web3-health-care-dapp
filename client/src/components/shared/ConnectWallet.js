@@ -1,22 +1,10 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
+import { useConnectWallet } from '@privy-io/react-auth';
 
 function ConnectWallet() {
   const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-
-  const handleConnect = () => {
-    alert(connectors.map((c) => c.id + ' : ' + c.type).join('\n') || 'NO CONNECTORS');
-
-    // Computer or MetaMask in-app browser: use the extension
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const inj = connectors.find((c) => c.type === 'injected');
-      if (inj) return connect({ connector: inj });
-    }
-    // Phone browser: use WalletConnect
-    const wc = connectors.find((c) => c.id === 'walletConnect');
-    if (wc) return connect({ connector: wc });
-  };
+  const { connectWallet } = useConnectWallet();
 
   if (isConnected) {
     return (
@@ -37,7 +25,7 @@ function ConnectWallet() {
   return (
     <div className="text-center">
       <button
-        onClick={handleConnect}
+        onClick={() => connectWallet()}
         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-lg font-bold"
       >
         🦊 Connect Wallet
