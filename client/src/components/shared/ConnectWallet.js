@@ -1,10 +1,20 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { injected } from 'wagmi/connectors';
 
 function ConnectWallet() {
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
+
+  const handleConnect = () => {
+    // If a wallet extension exists (computer or MetaMask in-app browser) use it
+    if (typeof window !== 'undefined' && window.ethereum) {
+      const inj = connectors.find((c) => c.type === 'injected');
+      if (inj) return connect({ connector: inj });
+    }
+    // Otherwise (normal phone browser) use WalletConnect
+    const wc = connectors.find((c) => c.id === 'walletConnect');
+    if (wc) return connect({ connector: wc });
+  };
 
   if (isConnected) {
     return (
@@ -25,10 +35,10 @@ function ConnectWallet() {
   return (
     <div className="text-center">
       <button
-        onClick={() => connect({ connector: injected() })}
+        onClick={handleConnect}
         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-lg font-bold"
       >
-        🦊 Connect MetaMask
+        🦊 Connect Wallet
       </button>
     </div>
   );
