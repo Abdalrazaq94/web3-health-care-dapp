@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react";
 import { useConnect, useAccount, useReadContract } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { useConnectWallet } from '@privy-io/react-auth';
 import { useNavigate } from "react-router-dom";
 import HomeNavbar from "../components/shared/Homenavbar";
 import HomeFooter from "../components/shared/Homefooter";
@@ -54,6 +55,7 @@ function Icon({ name, className = "w-5 h-5" }) {
 function ConnectWalletButton() {
   const { connect, isPending } = useConnect();
   const { isConnected, address } = useAccount();
+  const { connectWallet } = useConnectWallet();
   const navigate = useNavigate();
   const [connecting, setConnecting] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
@@ -85,17 +87,22 @@ function ConnectWalletButton() {
     }
   }, [shouldRedirect, isConnected, isAdmin, doctorInfo, isRegisteredDoctor, navigate]);
 
-  const handleConnect = async () => {
+const handleConnect = async () => {
     if (isConnected) { redirectNow(); return; }
     setConnecting(true);
-    try {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      // Computer / MetaMask browser — use extension (same as before)
       connect({ connector: injected() }, {
         onSuccess: () => { setShouldRedirect(true); setConnecting(false); },
         onError: () => setConnecting(false),
       });
-    } catch (_) { setConnecting(false); }
+    } else {
+      // Phone browser — open wallet menu (WalletConnect → MetaMask app)
+      setShouldRedirect(true);
+      connectWallet();
+      setConnecting(false);
+    }
   };
-
   const busy = isPending || connecting || (shouldRedirect && !isAdmin && doctorInfo === undefined);
   const connectedLabel = isAdmin ? "Go to Admin Dashboard" : isRegisteredDoctor ? "Go to Dashboard" : "Register as Doctor";
 
